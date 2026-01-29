@@ -15,6 +15,7 @@ import {
   type InputNumberValueChangeEvent,
 } from "primereact/inputnumber";
 import type { Nullable } from "primereact/ts-helpers";
+import { Badge } from "primereact/badge";
 
 function App() {
   const [currentPageRows, setCurrentPageRows] = useState<ArtWorks[]>([]); //the data from API
@@ -80,9 +81,14 @@ function App() {
 
   const onCustomSelection = () => {
     if (!selectedNoOfRows || selectedNoOfRows < 0) return;
+    op.current?.hide();
+  };
 
-    setselectedArtworksIDs((prevSelectedIDs) => {
-      const newSelectedIDs = new Set(prevSelectedIDs);
+  useEffect(() => {
+    if (!selectedNoOfRows) return;
+
+    setselectedArtworksIDs((prev) => {
+      const newSelectedIDs = new Set(prev);
 
       // Deselect rows
       if (newSelectedIDs.size > selectedNoOfRows) {
@@ -111,34 +117,14 @@ function App() {
 
       return newSelectedIDs;
     });
-
-    op.current?.hide();
-  };
-
-
-  useEffect(() => {
-    if (!selectedNoOfRows) return;
-
-    setselectedArtworksIDs((prev) => {
-      if (prev.size >= selectedNoOfRows) return prev;
-
-      const newSelectedIDs = new Set(prev);
-      let remainingRowsToSelect = selectedNoOfRows - newSelectedIDs.size;
-
-      for (const row of currentPageRows) {
-        if (remainingRowsToSelect === 0) break;
-        if (!newSelectedIDs.has(row.id)) {
-          newSelectedIDs.add(row.id);
-          remainingRowsToSelect--;
-        }
-      }
-
-      return newSelectedIDs;
-    });
   }, [currentPageRows, selectedNoOfRows]);
 
   return (
     <>
+      <Badge
+        value={`Selected Rows: ${selectedArtworksIDs.size}`}
+        severity="contrast"
+      />
       <DataTable
         value={currentPageRows}
         dataKey="id"
