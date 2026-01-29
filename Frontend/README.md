@@ -1,73 +1,145 @@
-# React + TypeScript + Vite
+# Artworks DataTable – React Internship Assignment
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a React application built as part of a technical assignment. It demonstrates **server-side pagination**, **persistent row selection**, and **custom bulk selection** using the **PrimeReact DataTable** component while consuming data from the **Art Institute of Chicago API**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Live Demo
 
-## React Compiler
+**Deployed URL:** https://artworksdata.netlify.app/
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Features Implemented
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Server-Side Pagination
+- Data is fetched **page by page** from the API
+- No prefetching or caching of other pages
+- Pagination state (`page`, `rows`) is synced with the API
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Data Display
+The following artwork fields are displayed in the table:
+- `title`
+- `place_of_origin`
+- `artist_display`
+- `inscriptions`
+- `date_start`
+- `date_end`
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Row Selection
+- Checkbox selection for individual rows
+- Select / deselect all rows on the **current page**
+- Selection is based on a unique `id` (`dataKey="id"`)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Persistent Selection Across Pages
+- Selected rows **remain selected** when navigating between pages
+- Selection state is maintained using a global `Set<number>` of artwork IDs
+- No row objects from other pages are stored in memory
+
+### Custom Row Selection Panel
+- Overlay panel triggered from the selection column header
+- User can input `N` to select a specific number of rows
+- Selection is applied **incrementally across pages** without prefetching
+
+Example:
+- Page size = 12
+- User selects `15`
+- Page 1 → 12 rows selected
+- Page 2 → first 3 rows automatically selected
+
+---
+
+## Selection Strategy (Important)
+
+To comply with the assignment constraints:
+
+- No prefetching of other pages
+- No storing of row objects from other pages
+- No looping API calls for bulk selection
+
+### ✔ Implemented Approach
+
+- Only **current page data** is stored
+- Selected rows are tracked using:
+  ```ts
+  Set<number> // artwork IDs
+  ```
+- On each page load:
+  - The table derives selected rows by matching IDs
+- Custom bulk selection:
+  - Selects as many rows as possible on the current page
+  - Remaining selections are applied when the next page loads
+
+This ensures:
+- Low memory usage
+- True server-side pagination
+- Persistent selection behavior
+
+---
+
+## Tech Stack
+
+- **React** (Vite)
+- **TypeScript**
+- **PrimeReact** (DataTable, OverlayPanel, InputNumber)
+- **Art Institute of Chicago API**
+
+---
+
+## Installation & Setup
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+
+# Navigate to the project directory
+cd artworks-datatable
+
+# Install dependencies
+npm install
+
+# Run the development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## API Used
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```txt
+https://api.artic.edu/api/v1/artworks?page=1
 ```
+
+The API is called on:
+- Initial load (page 1)
+- Every pagination change
+
+---
+
+## Assignment Constraints Followed
+
+- Vite used (no CRA)
+- TypeScript only
+- PrimeReact DataTable
+- Server-side pagination
+- Persistent row selection
+- No mass data storage
+- No prefetching of pages
+
+---
+
+## Testing Checklist
+
+- [x] Navigate between pages and verify selections persist
+- [x] Select rows on multiple pages
+- [x] Use custom selection > page size
+- [x] Reload pages and ensure fresh API fetch
+
+---
+
+
+## Author
+
+**Name:** Vidhilika Gupta  
+
+---
