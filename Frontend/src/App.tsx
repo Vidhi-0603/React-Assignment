@@ -27,6 +27,8 @@ function App() {
   );
   const [selectedNoOfRows, setSelectedNoOfRows] =
     useState<Nullable<number | null>>(0);
+  const [inputValue, setInputValue] = useState<Nullable<number | null>>(0);
+
   const op = useRef<OverlayPanel>(null);
 
   const currentSelectedArtworks = currentPageRows.filter((artwork) =>
@@ -80,7 +82,9 @@ function App() {
   );
 
   const onCustomSelection = () => {
-    if (!selectedNoOfRows || selectedNoOfRows < 0) return;
+    if (!inputValue || inputValue <= 0) return;
+    setSelectedNoOfRows(inputValue); // ✅ drives selection
+    setInputValue(0);
     op.current?.hide();
   };
 
@@ -122,7 +126,11 @@ function App() {
   return (
     <>
       <Badge
-        value={`Selected Rows: ${selectedArtworksIDs.size}`}
+        value={
+          selectedNoOfRows
+            ? `Selected: ${selectedArtworksIDs.size} / ${selectedNoOfRows}`
+            : `Selected: ${selectedArtworksIDs.size}`
+        }
         severity="contrast"
       />
       <DataTable
@@ -155,9 +163,9 @@ function App() {
       </DataTable>
       <OverlayPanel ref={op}>
         <InputNumber
-          value={selectedNoOfRows}
+          value={inputValue}
           onValueChange={(e: InputNumberValueChangeEvent) =>
-            setSelectedNoOfRows(e.value)
+            setInputValue(e.value)
           }
           placeholder="Select N rows"
         />
